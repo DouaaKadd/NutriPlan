@@ -1,0 +1,108 @@
+<header class="px-10 py-8 max-w-[calc(1440px-280px)] mx-auto">
+  <span class="text-label-caps text-on-surface-variant opacity-60">HOY · {{ today }}</span>
+  <h2 class="text-headline-lg mt-2">Hola, {{ auth.user()?.name }}</h2>
+  <p class="text-on-surface-variant mt-1 opacity-80">Esto es lo que llevas comido hoy.</p>
+</header>
+
+<div class="px-10 pb-12 max-w-[calc(1440px-280px)] mx-auto">
+
+  @if (loading()) {
+    <div class="tonal-layer-card p-6 rounded-xl">Cargando resumen…</div>
+  } @else if (summary(); as s) {
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      <div class="tonal-layer-card p-6 rounded-xl flex flex-col justify-between">
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block mb-2">CALORÍAS</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-display-lg leading-none">{{ s.totals.kcal }}</span>
+            <span class="text-on-surface-variant opacity-60">/ {{ s.goal?.kcal_target ?? '—' }} kcal</span>
+          </div>
+        </div>
+        <div class="mt-6 w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+          <div class="bg-primary h-full transition-all duration-700" [style.width.%]="pct(s.progress?.kcal)"></div>
+        </div>
+      </div>
+
+      <div class="tonal-layer-card p-6 rounded-xl flex flex-col justify-between">
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block mb-2">PROTEÍNAS</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-display-lg leading-none">{{ s.totals.proteins }}<span class="text-headline-md">g</span></span>
+            <span class="text-on-surface-variant opacity-60">/ {{ s.goal?.proteins_g_target ?? '—' }} g</span>
+          </div>
+        </div>
+        <div class="mt-6 w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+          <div class="bg-primary h-full transition-all duration-700" [style.width.%]="pct(s.progress?.proteins)"></div>
+        </div>
+      </div>
+
+      <div class="tonal-layer-card p-6 rounded-xl flex flex-col justify-between">
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block mb-2">HIDRATOS</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-display-lg leading-none">{{ s.totals.carbs }}<span class="text-headline-md">g</span></span>
+            <span class="text-on-surface-variant opacity-60">/ {{ s.goal?.carbs_g_target ?? '—' }} g</span>
+          </div>
+        </div>
+        <div class="mt-6 w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+          <div class="bg-primary h-full transition-all duration-700" [style.width.%]="pct(s.progress?.carbs)"></div>
+        </div>
+      </div>
+
+      <div class="tonal-layer-card p-6 rounded-xl flex flex-col justify-between">
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block mb-2">GRASAS</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-display-lg leading-none">{{ s.totals.fats }}<span class="text-headline-md">g</span></span>
+            <span class="text-on-surface-variant opacity-60">/ {{ s.goal?.fats_g_target ?? '—' }} g</span>
+          </div>
+        </div>
+        <div class="mt-6 w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+          <div class="bg-primary h-full transition-all duration-700" [style.width.%]="pct(s.progress?.fats)"></div>
+        </div>
+      </div>
+    </div>
+
+    @if (remaining(); as r) {
+      <div class="tonal-layer-card p-8 rounded-xl mb-10 flex flex-col md:flex-row items-center gap-12">
+        <div class="flex flex-col border-r-0 md:border-r border-outline-variant pr-0 md:pr-12">
+          <h3 class="text-headline-md">Te queda por consumir</h3>
+          <p class="text-on-surface-variant opacity-60">Restante para cubrir tu objetivo diario.</p>
+        </div>
+        <div class="flex flex-wrap flex-1 justify-between gap-8">
+          <div class="flex flex-col items-center md:items-start">
+            <span class="text-display-lg text-primary leading-tight">{{ r.kcal }}</span>
+            <span class="text-label-caps text-on-surface-variant opacity-60">KCAL</span>
+          </div>
+          <div class="flex flex-col items-center md:items-start">
+            <span class="text-display-lg text-primary leading-tight">{{ r.proteins }}g</span>
+            <span class="text-label-caps text-on-surface-variant opacity-60">PROTEÍNAS</span>
+          </div>
+          <div class="flex flex-col items-center md:items-start">
+            <span class="text-display-lg text-primary leading-tight">{{ r.carbs }}g</span>
+            <span class="text-label-caps text-on-surface-variant opacity-60">HIDRATOS</span>
+          </div>
+          <div class="flex flex-col items-center md:items-start">
+            <span class="text-display-lg text-primary leading-tight">{{ r.fats }}g</span>
+            <span class="text-label-caps text-on-surface-variant opacity-60">GRASAS</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (type of mealTypes; track type) {
+        <app-meal-card
+          [type]="type"
+          [meal]="mealOf(type)"
+          (add)="openPicker($event)"
+          (removeItem)="onRemoveItem($event)" />
+      }
+    </div>
+  }
+</div>
+
+@if (pickerType()) {
+  <app-food-picker (closed)="closePicker()" (picked)="onPicked($event)" />
+}

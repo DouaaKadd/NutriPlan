@@ -1,0 +1,40 @@
+<div class="min-h-screen flex items-center justify-center px-4 py-12 bg-[var(--color-bg)]">
+  <div class="w-full max-w-md">
+    <a href="/" class="flex items-center gap-2 mb-8 justify-center">
+      <span class="h-8 w-8 rounded-lg bg-[var(--color-primary)] grid place-items-center text-white text-sm font-bold">N</span>
+      <span class="font-display text-2xl">NutriPlan</span>
+    </a>
+
+    <div class="card">
+      <h1 class="font-display text-3xl mb-2">Bienvenida de nuevo</h1>
+      <p class="text-sm text-[var(--color-muted)] mb-6">Inicia sesión para continuar con tu plan.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium mb-1">Email</label>
+          <input id="email" type="email" formControlName="email" autocomplete="email" class="input"
+            placeholder="tu@email.com" />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+          <input id="password" type="password" formControlName="password" autocomplete="current-password" class="input"
+            placeholder="••••••••" />
+        </div>
+
+        @if (error()) {
+          <p class="text-sm text-[var(--color-danger)]">{{ error() }}</p>
+        }
+
+        <button type="submit" [disabled]="form.invalid || loading()" class="btn-primary w-full mt-2">
+          @if (loading()) { Entrando… } @else { Entrar }
+        </button>
+      </form>
+
+      <p class="text-sm text-center mt-6 text-[var(--color-muted)]">
+        ¿Aún no tienes cuenta?
+        <a routerLink="/register" class="text-[var(--color-primary)] font-medium hover:underline">Regístrate</a>
+      </p>
+    </div>
+  </div>
+</div>

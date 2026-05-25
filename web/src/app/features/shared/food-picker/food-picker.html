@@ -1,0 +1,107 @@
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-start sm:items-center justify-center p-4 sm:p-6"
+  (click)="close()">
+  <div class="bg-[var(--color-surface)] w-full max-w-2xl rounded-2xl shadow-xl max-h-[90vh] flex flex-col overflow-hidden"
+    (click)="$event.stopPropagation()">
+
+    @if (!selected()) {
+      <header class="px-5 py-4 border-b border-[var(--color-line)] flex items-center gap-3">
+        <input [formControl]="query" type="search" placeholder="Buscar alimento (mín. 2 letras)…"
+          class="input flex-1" autofocus />
+        <button (click)="close()" class="btn-ghost px-3 py-2 text-sm">Cerrar</button>
+      </header>
+
+      <div class="overflow-y-auto flex-1 px-5 py-3">
+        @if (loading()) {
+          <p class="text-sm text-[var(--color-muted)] py-6 text-center">Buscando…</p>
+        }
+
+        @if (!loading() && local().length === 0 && remote().length === 0 && query.value.length >= 2) {
+          <p class="text-sm text-[var(--color-muted)] py-6 text-center">Sin resultados.</p>
+        }
+
+        @if (local().length > 0) {
+          <section class="mb-5">
+            <p class="text-xs uppercase tracking-wider text-[var(--color-muted)] mb-2">Tu biblioteca</p>
+            <ul class="space-y-1.5">
+              @for (food of local(); track food.id) {
+                <li>
+                  <button type="button" (click)="select(food)"
+                    class="w-full flex items-center gap-3 p-3 border border-[var(--color-line)] rounded-lg hover:border-[var(--color-primary)] text-left">
+                    @if (food.image_url) {
+                      <img [src]="food.image_url" alt="" class="h-10 w-10 rounded object-cover" />
+                    } @else {
+                      <div class="h-10 w-10 rounded bg-[var(--color-primary-soft)] grid place-items-center text-sm">🥗</div>
+                    }
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium truncate">{{ food.name }}</p>
+                      <p class="text-xs text-[var(--color-muted)] truncate">
+                        @if (food.brand) { {{ food.brand }} · } {{ food.kcal_per_100g }} kcal/100g
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (remote().length > 0) {
+          <section>
+            <p class="text-xs uppercase tracking-wider text-[var(--color-muted)] mb-2">Open Food Facts</p>
+            <ul class="space-y-1.5">
+              @for (food of remote(); track food.external_id) {
+                <li>
+                  <button type="button" (click)="select(food)"
+                    class="w-full flex items-center gap-3 p-3 border border-[var(--color-line)] rounded-lg hover:border-[var(--color-primary)] text-left">
+                    @if (food.image_url) {
+                      <img [src]="food.image_url" alt="" class="h-10 w-10 rounded object-cover" loading="lazy" />
+                    } @else {
+                      <div class="h-10 w-10 rounded bg-[var(--color-bg)] grid place-items-center text-sm">📦</div>
+                    }
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium truncate">{{ food.name }}</p>
+                      <p class="text-xs text-[var(--color-muted)] truncate">
+                        @if (food.brand) { {{ food.brand }} · } {{ food.kcal_per_100g }} kcal/100g
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    } @else {
+      <header class="px-5 py-4 border-b border-[var(--color-line)] flex items-center gap-3">
+        <button (click)="back()" class="btn-ghost px-3 py-2 text-sm">← Volver</button>
+        <p class="font-display text-lg truncate flex-1">{{ selected()!.name }}</p>
+      </header>
+
+      <div class="px-5 py-5 overflow-y-auto flex-1">
+        <p class="text-sm text-[var(--color-muted)] mb-1">{{ selected()!.brand || 'Sin marca' }}</p>
+        <p class="text-xs text-[var(--color-muted)] mb-5">{{ selected()!.kcal_per_100g }} kcal · {{ selected()!.proteins_per_100g }}g prot · {{ selected()!.carbs_per_100g }}g HC · {{ selected()!.fats_per_100g }}g grasa (por 100g)</p>
+
+        <label for="grams" class="block text-sm font-medium mb-1">Cantidad (gramos)</label>
+        <input id="grams" type="number" [formControl]="grams" min="1" max="5000" class="input mb-5" />
+
+        @if (preview(); as p) {
+          <div class="grid grid-cols-4 gap-3 mb-6">
+            <div class="card text-center py-3"><p class="text-xs text-[var(--color-muted)]">kcal</p><p class="font-display text-2xl">{{ p.kcal }}</p></div>
+            <div class="card text-center py-3"><p class="text-xs text-[var(--color-muted)]">prot</p><p class="font-display text-2xl">{{ p.proteins }}</p></div>
+            <div class="card text-center py-3"><p class="text-xs text-[var(--color-muted)]">HC</p><p class="font-display text-2xl">{{ p.carbs }}</p></div>
+            <div class="card text-center py-3"><p class="text-xs text-[var(--color-muted)]">grasa</p><p class="font-display text-2xl">{{ p.fats }}</p></div>
+          </div>
+        }
+
+        @if (error()) {
+          <p class="text-sm text-[var(--color-danger)] mb-3">{{ error() }}</p>
+        }
+
+        <button (click)="confirm()" [disabled]="saving() || !grams.value || grams.value < 1"
+          class="btn-primary w-full">
+          @if (saving()) { Añadiendo… } @else { Añadir a la comida }
+        </button>
+      </div>
+    }
+  </div>
+</div>

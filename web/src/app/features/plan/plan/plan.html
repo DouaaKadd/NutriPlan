@@ -1,0 +1,93 @@
+<header class="px-10 py-8 max-w-[calc(1440px-280px)] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+  <div>
+    <span class="text-label-caps text-on-surface-variant opacity-60">PLAN SEMANAL</span>
+    <h2 class="text-headline-lg mt-2">Tu menú de la semana</h2>
+    <p class="text-on-surface-variant mt-1 opacity-80">Generado automáticamente según tus objetivos y tu biblioteca de alimentos.</p>
+  </div>
+  <button (click)="generate()" [disabled]="generating()" class="btn-primary inline-flex items-center gap-2">
+    <span class="material-symbols-outlined" style="font-size:20px">auto_awesome</span>
+    @if (generating()) { Generando… } @else { Generar plan }
+  </button>
+</header>
+
+<div class="px-10 pb-12 max-w-[calc(1440px-280px)] mx-auto">
+
+  @if (error()) {
+    <div class="tonal-layer-card p-4 rounded-xl border-error text-error mb-6 flex items-start gap-3">
+      <span class="material-symbols-outlined">error</span>
+      <p class="text-sm">{{ error() }}</p>
+    </div>
+  }
+
+  @if (plans().length > 1) {
+    <div class="flex flex-wrap gap-2 mb-6">
+      @for (p of plans(); track p.id) {
+        <button (click)="select(p)"
+          [class.bg-primary]="current()?.id === p.id"
+          [class.text-white]="current()?.id === p.id"
+          [class.bg-surface-container]="current()?.id !== p.id"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-colors">
+          Semana del {{ p.week_start }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="tonal-layer-card p-6 rounded-xl">Cargando…</div>
+  } @else if (!current()) {
+    <div class="tonal-layer-card p-10 rounded-xl text-center">
+      <span class="material-symbols-outlined text-primary mb-3" style="font-size:48px">auto_awesome</span>
+      <p class="font-serif text-2xl mb-2">Aún no tienes plan</p>
+      <p class="text-on-surface-variant opacity-70 text-sm mb-6 max-w-md mx-auto">
+        Pulsa "Generar plan" para que NutriPlan te proponga un menú de 7 días basado en tus objetivos.
+      </p>
+      <p class="text-xs text-on-surface-variant opacity-60">
+        Necesitas tener objetivos definidos y al menos algunos alimentos en tu biblioteca.
+      </p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (day of days(); track day.date) {
+        <article class="tonal-layer-card p-6 rounded-xl">
+          <div class="flex items-baseline justify-between mb-4">
+            <h3 class="font-serif text-xl capitalize">{{ day.readable }}</h3>
+            <span class="text-label-caps text-on-surface-variant opacity-60">{{ day.date }}</span>
+          </div>
+
+          @for (block of [
+            { label: 'Desayuno', items: day.breakfast },
+            { label: 'Comida', items: day.lunch },
+            { label: 'Snack', items: day.snack },
+            { label: 'Cena', items: day.dinner }
+          ]; track block.label) {
+            <div class="mb-4 last:mb-0">
+              <p class="text-label-caps text-on-surface-variant opacity-60 mb-2">{{ block.label }}</p>
+              @if (block.items.length === 0) {
+                <p class="text-sm text-on-surface-variant italic opacity-50">—</p>
+              } @else {
+                <ul class="space-y-1">
+                  @for (it of block.items; track it.food_id) {
+                    <li class="text-sm flex justify-between gap-2">
+                      <span class="truncate">{{ it.name }}@if (it.brand) { <span class="opacity-60"> · {{ it.brand }}</span> }</span>
+                      <span class="text-on-surface-variant whitespace-nowrap">{{ it.grams }} g</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </article>
+      }
+    </div>
+
+    @if (current()) {
+      <div class="mt-6 flex justify-end">
+        <button (click)="remove(current()!)" class="btn-ghost text-sm text-error inline-flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px">delete</span>
+          Eliminar este plan
+        </button>
+      </div>
+    }
+  }
+</div>

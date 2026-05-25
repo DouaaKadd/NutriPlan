@@ -1,0 +1,143 @@
+<header class="px-10 py-8 max-w-[calc(1440px-280px)] mx-auto">
+  <span class="text-label-caps text-on-surface-variant opacity-60">ALIMENTOS</span>
+  <h2 class="text-headline-lg mt-2">Buscar y gestionar alimentos</h2>
+  <p class="text-on-surface-variant mt-1 opacity-80">Busca en tu biblioteca o en la base de Open Food Facts. También puedes crear uno propio.</p>
+</header>
+
+<div class="px-10 pb-12 max-w-[calc(1440px-280px)] mx-auto">
+
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
+    <div class="flex-1 relative">
+      <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-size:20px">search</span>
+      <input [formControl]="query" type="search" placeholder="Buscar alimento (mín. 2 letras)…"
+        class="input pl-10" />
+    </div>
+    <button (click)="toggleForm()" class="btn-primary inline-flex items-center gap-2">
+      <span class="material-symbols-outlined" style="font-size:20px">add</span>
+      Nuevo alimento
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <form (ngSubmit)="create()" [formGroup]="form" class="tonal-layer-card p-6 rounded-xl mb-8 space-y-4">
+      <h3 class="text-headline-md">Crear alimento manual</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nombre</label>
+          <input type="text" formControlName="name" class="input" placeholder="Lentejas cocidas" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Marca (opcional)</label>
+          <input type="text" formControlName="brand" class="input" placeholder="Hacendado" />
+        </div>
+      </div>
+      <p class="text-label-caps text-on-surface-variant opacity-60">VALORES POR 100 G</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs text-on-surface-variant mb-1">Calorías</label>
+          <input type="number" step="0.1" formControlName="kcal_per_100g" class="input" />
+        </div>
+        <div>
+          <label class="block text-xs text-on-surface-variant mb-1">Proteínas (g)</label>
+          <input type="number" step="0.1" formControlName="proteins_per_100g" class="input" />
+        </div>
+        <div>
+          <label class="block text-xs text-on-surface-variant mb-1">Hidratos (g)</label>
+          <input type="number" step="0.1" formControlName="carbs_per_100g" class="input" />
+        </div>
+        <div>
+          <label class="block text-xs text-on-surface-variant mb-1">Grasas (g)</label>
+          <input type="number" step="0.1" formControlName="fats_per_100g" class="input" />
+        </div>
+      </div>
+      @if (error()) { <p class="text-error text-sm">{{ error() }}</p> }
+      <div class="flex gap-3">
+        <button type="submit" [disabled]="form.invalid || creating()" class="btn-primary">
+          @if (creating()) { Guardando… } @else { Guardar }
+        </button>
+        <button type="button" (click)="toggleForm()" class="btn-ghost">Cancelar</button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <div class="tonal-layer-card p-6 rounded-xl">Buscando…</div>
+  } @else {
+    <section class="mb-8">
+      <div class="flex items-baseline justify-between mb-3">
+        <h3 class="text-label-caps text-on-surface-variant opacity-60">TU BIBLIOTECA · {{ local().length }}</h3>
+      </div>
+
+      @if (local().length === 0) {
+        <div class="tonal-layer-card p-6 rounded-xl text-on-surface-variant text-sm italic opacity-70">
+          @if (query.value) { Sin coincidencias en tu biblioteca. }
+          @else { Aún no tienes alimentos guardados. Busca arriba o créa uno. }
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (food of local(); track food.id) {
+            <article class="tonal-layer-card p-4 rounded-xl flex items-center gap-3">
+              @if (food.image_url) {
+                <img [src]="food.image_url" alt="" class="h-14 w-14 rounded-lg object-cover flex-shrink-0" loading="lazy" />
+              } @else {
+                <div class="h-14 w-14 rounded-lg bg-secondary-container flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-primary">restaurant</span>
+                </div>
+              }
+              <div class="flex-1 min-w-0">
+                <p class="font-bold truncate">{{ food.name }}</p>
+                <p class="text-body-sm text-on-surface-variant truncate">
+                  @if (food.brand) { {{ food.brand }} · } {{ food.kcal_per_100g }} kcal/100g
+                </p>
+                <p class="text-xs text-on-surface-variant opacity-70 mt-0.5">
+                  P {{ food.proteins_per_100g }}g · HC {{ food.carbs_per_100g }}g · G {{ food.fats_per_100g }}g
+                </p>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    @if (remote().length > 0) {
+      <section>
+        <div class="flex items-baseline justify-between mb-3">
+          <h3 class="text-label-caps text-on-surface-variant opacity-60">OPEN FOOD FACTS · {{ remote().length }}</h3>
+          <p class="text-xs text-on-surface-variant opacity-60">Pulsa + para guardarlo en tu biblioteca.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (food of remote(); track food.external_id) {
+            <article class="tonal-layer-card p-4 rounded-xl flex items-center gap-3">
+              @if (food.image_url) {
+                <img [src]="food.image_url" alt="" class="h-14 w-14 rounded-lg object-cover flex-shrink-0" loading="lazy" />
+              } @else {
+                <div class="h-14 w-14 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0">
+                  <span class="material-symbols-outlined text-on-surface-variant">package_2</span>
+                </div>
+              }
+              <div class="flex-1 min-w-0">
+                <p class="font-bold truncate">{{ food.name }}</p>
+                <p class="text-body-sm text-on-surface-variant truncate">
+                  @if (food.brand) { {{ food.brand }} · } {{ food.kcal_per_100g }} kcal/100g
+                </p>
+                <p class="text-xs text-on-surface-variant opacity-70 mt-0.5">
+                  P {{ food.proteins_per_100g }}g · HC {{ food.carbs_per_100g }}g · G {{ food.fats_per_100g }}g
+                </p>
+              </div>
+              <button type="button" (click)="saveToLibrary(food)"
+                [disabled]="savingExternalId() === food.external_id"
+                class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-50"
+                aria-label="Guardar en biblioteca">
+                @if (savingExternalId() === food.external_id) {
+                  <span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span>
+                } @else {
+                  <span class="material-symbols-outlined" style="font-size:20px">add</span>
+                }
+              </button>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,11 @@
+# Logs de los dev servers
+.devserver.log
+.serve.log
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/

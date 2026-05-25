@@ -1,0 +1,104 @@
+<div class="p-6 lg:p-10 max-w-3xl mx-auto">
+  <header class="mb-8">
+    <p class="text-sm text-[var(--color-muted)] uppercase tracking-wider">Tus objetivos</p>
+    <h1 class="font-display text-4xl mt-1">¿A qué apuntas?</h1>
+    <p class="text-[var(--color-muted)] mt-1">Define tus metas diarias. El dashboard y los gráficos se calcularán contra estos valores.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="card">Cargando…</div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+      <div class="card">
+        <h2 class="font-display text-xl mb-1">Calorías y nivel de actividad</h2>
+        <p class="text-xs text-[var(--color-muted)] mb-4">El objetivo de kcal influye en los repartos sugeridos abajo.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="kcal">Calorías diarias (kcal)</label>
+            <input id="kcal" type="number" formControlName="kcal_target" class="input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="activity">Nivel de actividad</label>
+            <select id="activity" formControlName="activity_level" class="input">
+              @for (opt of activityOptions; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex items-baseline justify-between mb-1 flex-wrap gap-2">
+          <h2 class="font-display text-xl">Macronutrientes</h2>
+          <p class="text-xs text-[var(--color-muted)]">
+            Total: {{ macroKcal.total }} kcal
+            @if (macroKcal.total > 0) {
+              ({{ ((macroKcal.p / macroKcal.total) * 100).toFixed(0) }}/{{ ((macroKcal.c / macroKcal.total) * 100).toFixed(0) }}/{{ ((macroKcal.f / macroKcal.total) * 100).toFixed(0) }})
+            }
+          </p>
+        </div>
+        <p class="text-xs text-[var(--color-muted)] mb-4">Aplica un reparto típico según tu objetivo:</p>
+
+        <div class="flex flex-wrap gap-2 mb-5">
+          <button type="button" (click)="applySuggestion('30-40-30')" class="btn-ghost text-xs">
+            30/40/30 · Equilibrio
+          </button>
+          <button type="button" (click)="applySuggestion('40-30-30')" class="btn-ghost text-xs">
+            40/30/30 · Alta proteína
+          </button>
+          <button type="button" (click)="applySuggestion('25-50-25')" class="btn-ghost text-xs">
+            25/50/25 · Endurance
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Proteínas (g)</label>
+            <input type="number" formControlName="proteins_g_target" class="input" />
+            <p class="text-xs text-[var(--color-muted)] mt-1">{{ macroKcal.p }} kcal</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Hidratos (g)</label>
+            <input type="number" formControlName="carbs_g_target" class="input" />
+            <p class="text-xs text-[var(--color-muted)] mt-1">{{ macroKcal.c }} kcal</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Grasas (g)</label>
+            <input type="number" formControlName="fats_g_target" class="input" />
+            <p class="text-xs text-[var(--color-muted)] mt-1">{{ macroKcal.f }} kcal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="font-display text-xl mb-4">Otros objetivos</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Agua (ml)</label>
+            <input type="number" formControlName="water_ml_target" class="input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Peso objetivo (kg) · opcional</label>
+            <input type="number" step="0.1" formControlName="weight_kg_target" class="input" />
+          </div>
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="text-sm text-[var(--color-danger)]">{{ error() }}</p>
+      }
+
+      <div class="flex items-center gap-3">
+        <button type="submit" [disabled]="form.invalid || saving()" class="btn-primary">
+          @if (saving()) { Guardando… } @else { Guardar objetivos }
+        </button>
+        @if (saved()) {
+          <span class="text-sm text-[var(--color-primary)]">✓ Guardado</span>
+        }
+      </div>
+    </form>
+  }
+</div>

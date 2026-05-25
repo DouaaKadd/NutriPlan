@@ -1,0 +1,67 @@
+<header class="px-10 py-8 max-w-[calc(1440px-280px)] mx-auto">
+  <span class="text-label-caps text-on-surface-variant opacity-60">DIARIO</span>
+  <h2 class="text-headline-lg mt-2">Tu historial de comidas</h2>
+  <p class="text-on-surface-variant mt-1 opacity-80">Navega por cualquier día y revisa o edita lo que comiste.</p>
+</header>
+
+<div class="px-10 pb-12 max-w-[calc(1440px-280px)] mx-auto">
+
+  <div class="tonal-layer-card p-6 rounded-xl mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+    <div class="flex items-center gap-3">
+      <button type="button" (click)="shiftDate(-1)"
+        class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant" aria-label="Día anterior">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <input type="date" [value]="date()" (change)="changeDate($any($event.target).value)"
+        class="input max-w-[200px]" />
+      <button type="button" (click)="shiftDate(1)"
+        class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant" aria-label="Día siguiente">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-3">
+      <p class="font-serif text-lg capitalize text-on-surface">{{ readableDate() }}</p>
+      <button (click)="goToday()" class="btn-ghost text-sm">Hoy</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="tonal-layer-card p-6 rounded-xl">Cargando…</div>
+  } @else {
+    @if (summary(); as s) {
+      <div class="tonal-layer-card p-6 rounded-xl mb-8 flex flex-wrap gap-x-10 gap-y-3">
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block">KCAL</span>
+          <span class="font-serif text-2xl">{{ s.totals.kcal }}</span>
+          @if (s.goal) { <span class="text-on-surface-variant opacity-60 text-sm"> / {{ s.goal.kcal_target }}</span> }
+        </div>
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block">PROT</span>
+          <span class="font-serif text-2xl">{{ s.totals.proteins }}g</span>
+        </div>
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block">HC</span>
+          <span class="font-serif text-2xl">{{ s.totals.carbs }}g</span>
+        </div>
+        <div>
+          <span class="text-label-caps text-on-surface-variant opacity-60 block">GRASA</span>
+          <span class="font-serif text-2xl">{{ s.totals.fats }}g</span>
+        </div>
+      </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (type of mealTypes; track type) {
+        <app-meal-card
+          [type]="type"
+          [meal]="mealOf(type)"
+          (add)="openPicker($event)"
+          (removeItem)="onRemoveItem($event)" />
+      }
+    </div>
+  }
+</div>
+
+@if (pickerType()) {
+  <app-food-picker (closed)="closePicker()" (picked)="onPicked($event)" />
+}

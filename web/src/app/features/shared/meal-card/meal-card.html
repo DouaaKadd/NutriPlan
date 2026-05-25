@@ -1,0 +1,41 @@
+<article class="tonal-layer-card p-8 rounded-xl hover:shadow-lg transition-shadow">
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h4 class="text-headline-md">{{ label }}</h4>
+      @if (!meal || meal.items.length === 0) {
+        <p class="text-on-surface-variant italic opacity-60 mt-1">Sin alimentos registrados.</p>
+      }
+    </div>
+    <span class="text-headline-md text-on-surface-variant">{{ totalKcal() }} kcal</span>
+  </div>
+
+  @if (meal && meal.items.length > 0) {
+    <ul class="divide-y divide-outline-variant -mx-1 mb-6">
+      @for (item of meal.items; track item.id) {
+        <li class="px-1 py-3 flex items-center gap-3">
+          @if (item.food?.image_url) {
+            <img [src]="item.food!.image_url" alt="" class="h-10 w-10 rounded-lg object-cover flex-shrink-0" loading="lazy" />
+          } @else {
+            <div class="h-10 w-10 rounded-lg bg-secondary-container flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-primary" style="font-size:20px">restaurant</span>
+            </div>
+          }
+          <div class="flex-1 min-w-0">
+            <p class="font-bold truncate">{{ item.food?.name }}</p>
+            <p class="text-body-sm text-on-surface-variant">{{ item.grams }} g · {{ itemKcal(item) }} kcal</p>
+          </div>
+          <button type="button" (click)="removeItem.emit({ meal: meal!, item })"
+            class="text-on-surface-variant hover:text-error p-1 rounded-full" aria-label="Eliminar">
+            <span class="material-symbols-outlined" style="font-size:20px">close</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <button type="button" (click)="add.emit(type)"
+    class="w-full border border-dashed border-outline-variant hover:border-primary hover:bg-secondary-container rounded-lg py-4 text-center transition-all flex items-center justify-center gap-2 text-on-surface-variant hover:text-primary">
+    <span class="material-symbols-outlined">add</span>
+    <span class="font-bold">Añadir alimento</span>
+  </button>
+</article>

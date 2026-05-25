@@ -7,7 +7,7 @@
 | Capa | Tecnología |
 |---|---|
 | Backend | **Laravel 12** · PHP 8.2 · Sanctum (tokens) · Eloquent ORM |
-| Base de datos | **MySQL 8** (MariaDB compatible) |
+| Base de datos | **SQLite** por defecto (configurable a MySQL/MariaDB en `.env`) |
 | Frontend | **Angular 21** standalone · TypeScript · Signals · Reactive Forms |
 | Estilos | **Tailwind CSS v4** · Material Design 3 (paleta verde) |
 | Tipografía | Newsreader (serif) + Hanken Grotesk (sans) + Material Symbols |
@@ -59,7 +59,8 @@ NutriPlan/
 - PHP 8.2+
 - Composer 2.x
 - Node 20+
-- MySQL/MariaDB (XAMPP, Laragon o similar)
+
+(No necesitas MySQL ni servidor externo — la BD por defecto es SQLite, un archivo dentro del propio repo.)
 
 ### Backend (Laravel)
 ```bash
@@ -67,10 +68,11 @@ cd api
 composer install
 cp .env.example .env
 php artisan key:generate
-# Configura DB_DATABASE, DB_USERNAME, DB_PASSWORD en .env
-php artisan migrate
-php artisan serve            # http://127.0.0.1:8000
+php artisan migrate                # crea database/database.sqlite
+php artisan serve                  # http://127.0.0.1:8000
 ```
+
+> Si prefieres MySQL/MariaDB, edita `api/.env` poniendo `DB_CONNECTION=mysql` y descomenta las variables `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
 
 ### Frontend (Angular)
 ```bash
